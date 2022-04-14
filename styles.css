@@ -34,7 +34,6 @@ ul li.name{
     display: flex;
     justify-content: center;
     padding-top: 20px;
-    /* flex-wrap: wrap; */
 }
 
 
@@ -45,7 +44,7 @@ ul li.name{
 
 .stories {
     background-color: white;
-    /* width: 100%; */
+    width: 100%;
     padding-top: 10px;
     display: flex;
     justify-content: flex-start;
@@ -123,11 +122,8 @@ ul li.name{
 .suggestions {
     position: sticky;
     padding-left: 20px;
-    /* border: solid black; */
     height: fit-content;
     top: 100px;
-    /* width: fit-content;
-    */
 }
 
 .profile {
