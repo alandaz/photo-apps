@@ -18,7 +18,7 @@ body {
 }
 ul li, button {
     display: inline-block;
-    padding-right: 30px;
+    margin-right: 30px;
     font-size: large;
 }
 
@@ -57,7 +57,7 @@ ul li.name{
     padding-left:25px;
     text-align: center;
     font-size: medium;
-    color: rgb(124, 121, 121);
+    color: rgb(78, 83, 84);
 }
 
 .post {
@@ -115,8 +115,12 @@ ul li.name{
 }
 
 .post-input {
-    margin-left: 10px; color: gray; border: none; font-size: 17px;
+    margin-left: 10px; color: rgb(53, 54, 55); border: none; font-size: 17px;
     flex-grow: 1;
+}
+
+.post-input::placeholder{
+    color: rgb(53, 54, 55);
 }
 
 .suggestions {
@@ -143,7 +147,7 @@ div.profile img {
 .others {
     padding-top: 20px;
     font-size: x-large;
-    color: rgb(124, 121, 121);
+    color: rgb(53, 54, 55)
 }
 
 div.others img, div.stories img {
@@ -169,11 +173,17 @@ div.others img, div.stories img {
 }
 
 .link {
-    color: rgb(43, 105, 155); text-decoration: none;
+    color: rgb(42, 68, 212); text-decoration: none;
 }
 
 
 @media only screen and (max-width: 1000px) {
+
+    ul li, button {
+        display: inline-block;
+        margin-right: 20px;
+        font-size: large;
+    }
 
     .feed {
         overflow: hidden;
@@ -211,6 +221,12 @@ div.others img, div.stories img {
 
 
 @media only screen and (max-width: 600px) {
+
+    ul li, button {
+        display: inline-block;
+        margin-right: 10px;
+        font-size: large;
+    }
 
     .feed {
         overflow: hidden;
