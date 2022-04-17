@@ -1,0 +1,39 @@
+<div class = "suggestions">
+    <div class = "profile">
+        <img src="https://i.picsum.photos/id/283/200/200.jpg?hmac=Qyx_FaWqQPrmQrGhQNKh2t2FUuwTiMNTS1VCkc86YrM" alt="">
+        <div style="padding-left: 15px;">{{ user.get('username') }}</div>
+    </div>
+    <div class = "others">
+        <div style="font-weight: bold;">
+            Suggestions for you
+        </div>
+        {% for user in suggestions %}
+        <div class = "sg-profile">
+            <div class="sg-img-name"> 
+                <!---
+                <img src="https://i.picsum.photos/id/171/200/200.jpg?hmac=Iac8JDq1zmWNTEFRE3gkPZthKsJwpOS76FjbzDkGSc8" alt="">
+                -->
+                
+                <img src =" {{ user.get('image_url') }}" >
+               
+                <div style="padding-left: 5px;">
+                    <div style="font-weight: bold; color: black;">
+                        {{ user.get('username') }}
+                    </div>
+                    <div>
+                        suggested for you
+                    </div>
+                </div>
+               
+        
+            </div>
+            <a class = "link" href="">
+                follow
+            </a>
+        </div> 
+        {% endfor %} 
+        
+       
+                                      
+    </div>
+</div>
