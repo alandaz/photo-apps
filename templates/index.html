@@ -10,17 +10,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
 </head>
 <body>
-   {% include 'includes/navbar.html' %}
-    <div class = "body">
-        <div class = "feed">
+{% include 'includes/navbar.html' %}
+    <section class = "interface">
+        <section class = "container">
             {% include 'includes/stories.html' %}
+            
             {% include 'includes/cards.html' %}
-        </div>
-        
-        {% include 'includes/suggestions.html' %}
-
-
-    </div>
+            
+        </section>
+    
+        <section class = "right">
+            <div class = "leftalign">
+            {% include 'includes/suggestions.html' %}
+            </div>
+        </section>
+    </section>
 </body>
 
 <!-- 

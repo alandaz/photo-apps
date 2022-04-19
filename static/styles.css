@@ -2,12 +2,35 @@ body {
     margin: 0%;
     background-color: #f2f2f2;
     font-family: Helvetica, sans-serif;
+    
 }
 
-.navbar {
+.container{
+    width: 55%; 
+    padding: 0 2em; 
+    max-width: 1000px;
+    float: left; 
+
+}
+.right{
+    display: column; 
+    float: right; 
+    display: inline-block;
+    justify-content: space-between; 
+    top: 0px; 
+    right: 0px; 
+
+    
+}
+.leftalign{
+    padding-right: 10px;  
+}
+
+nav{
     list-style-type: none;
     background-color: white;
     width: 100vw;
+    height: 70px; 
     top: 0px;
     display: flex;
     justify-content: space-between;
@@ -16,31 +39,26 @@ body {
     font-family: 'Comfortaa';
     
 }
-ul li, button {
+.butgroup {
     display: inline-block;
     margin-right: 30px;
     font-size: large;
 }
 
-ul li.name{ 
+div .logo { 
     font-size: xx-large;
     padding-left: 50px;
+    color: black; 
 }
 
-.body {
+.interface {
     margin-left: 40px;
     margin-right: 40px;
   
-    display: flex;
     justify-content: center;
     padding-top: 20px;
 }
 
-
-.feed {
-    overflow: hidden;
-    width: 45%;
-}
 
 .stories {
     background-color: white;
@@ -62,6 +80,7 @@ ul li.name{
 
 .post {
     margin-bottom: 50px;
+    
 }
 
 .ind-post {
@@ -174,6 +193,13 @@ div.others img, div.stories img {
 
 .link {
     color: rgb(37, 35, 211); text-decoration: none;
+}
+
+.viewallcomments{
+    color: blue; 
+    margin-bottom: 10px; 
+    margin-left: 20px; 
+    font-size: 15px; 
 }
 
 
