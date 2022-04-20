@@ -1,7 +1,7 @@
 <div class = "suggestions">
     <div class = "profile">
-        <img src="https://i.picsum.photos/id/283/200/200.jpg?hmac=Qyx_FaWqQPrmQrGhQNKh2t2FUuwTiMNTS1VCkc86YrM" alt="">
-        <div style="padding-left: 15px;">{{ user.get('username') }}</div>
+        <img src="{{user.get('image_url')}}" alt="">
+        <div class ="suggestionsusername" style="padding-left: 15px;">{{ user.get('username') }}</div>
     </div>
     <div class = "others">
         <div style="font-weight: bold;">
