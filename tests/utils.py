@@ -2,7 +2,7 @@ import os
 from sqlalchemy import create_engine, inspect
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(None, None, False, True, True)
 
 def modify_system_path():
     import os, sys, inspect
