@@ -7,7 +7,7 @@ from faker import Faker
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(None, None, False, True, True)
 
 fake = Faker()
 
@@ -237,6 +237,7 @@ def create_comment_likes(comments):
 
 # creates all of the tables if they don't exist:
 with app.app_context():
+    print(os.environ.get('DB_URL'))
     step = 1
     # uncomment if you want to drop all tables
     print('{0}. Dropping all tables...'.format(step))

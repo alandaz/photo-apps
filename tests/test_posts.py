@@ -13,7 +13,7 @@ class TestPostListEndpoint(unittest.TestCase):
     def test_posts_get_defaults_to_20(self):
         response = requests.get(root_url + '/api/posts')
         data = response.json()
-        self.assertLessEqual(len(data), 20)
+        self.assertEqual(len(data), 20)
         self.assertEqual(response.status_code, 200)
 
     def test_posts_get_has_required_data(self):
@@ -184,7 +184,7 @@ class TestPostDetailEndpoint(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_post_patch_unauthorized_id_404(self):
-        post_no_access = utils.get_post_that_user_cannot_access(self.current_user.get('id'))
+        post_no_access = utils.get_post_that_user_cannot_edit_delete(self.current_user.get('id'))
         url = '{0}/api/posts/{1}'.format(root_url, post_no_access.get('id'))
         
         response = requests.patch(url, json={})
@@ -215,7 +215,7 @@ class TestPostDetailEndpoint(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_post_delete_unauthorized_id_404(self):
-        post_no_access = utils.get_post_that_user_cannot_access(self.current_user.get('id'))
+        post_no_access = utils.get_post_that_user_cannot_edit_delete(self.current_user.get('id'))
         url = '{0}/api/posts/{1}'.format(root_url, post_no_access.get('id'))
         
         response = requests.delete(url)

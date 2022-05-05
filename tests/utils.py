@@ -12,8 +12,8 @@ def modify_system_path():
 
 modify_system_path()
 
-root_url = 'http://127.0.0.1:5000'
-# root_url = 'https://photo-app-demo.herokuapp.com/'
+#root_url = 'http://127.0.0.1:5000'
+root_url = 'https://photo-app-alanda.herokuapp.com/'
 
 connection_string = os.environ.get('DB_URL')
 db = create_engine(connection_string, pool_size=10, max_overflow=0)
@@ -236,6 +236,7 @@ def get_authorized_user_ids(user_id):
     ids = get_following_ids(user_id)
     ids.append(user_id)
     return ids
+    
 
 def get_post_that_user_cannot_access(user_id):
     with db.connect() as conn:
@@ -269,6 +270,10 @@ def get_x_that_user_cannot_delete(table_name, user_id):
         conn.close()
         object = _zip(columns, rows)
         return object
+
+
+def get_post_that_user_cannot_edit_delete(user_id):
+    return get_x_that_user_cannot_delete('posts', user_id)
 
 
 def get_comment_that_user_cannot_delete(user_id):
