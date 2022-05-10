@@ -54,7 +54,7 @@ class PostLikesDetailEndpoint(Resource):
         try:
             id = int(id)
         except:
-            return Response(json.dumps({'message': 'invalid id'}), mimetype="application/json", status=400)
+            return Response(json.dumps({'message': 'invalid id2'}), mimetype="application/json", status=400)
 
         like = LikePost.query.get(id)
 

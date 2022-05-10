@@ -1,5 +1,6 @@
 import json
 from models import Post, Comment, Bookmark, Following, db, LikePost
+from models.like_comment import LikeComment
 from views import get_authorized_user_ids
 
 class ApiNavigator(object):
@@ -25,7 +26,35 @@ class ApiNavigator(object):
             ).limit(1).one()
         self.image_url = 'https://picsum.photos/300/300'
         # image_url = 'https://media.gettyimages.com/photos/happy-dog-picture-id182176638'
+        self.unliked_comment_id = self.get_unliked_comment()
+        self.likeComment = LikeComment.query.filter_by(
+                user_id=self.current_user.id
+            ).limit(1).one()
        
+    def get_unliked_comment(self):
+        ids = get_authorized_user_ids(self.current_user)
+        sql = '''
+            SELECT p.id 
+            FROM comments p
+            WHERE p.id NOT IN (
+                    -- posts that are already bookmarked:
+                    SELECT comment_id from likes_comments where user_id={user_id}
+                )
+                AND p.id IN (
+                    -- posts the current user can access:
+                    SELECT id from comments
+                    WHERE post_id IN (
+                            SELECT id from posts where user_id IN ({authorized_user_ids})
+                        )
+                )
+            LIMIT 1
+        '''.format(
+                user_id=self.current_user.id,
+                authorized_user_ids=', '.join([str(id) for id in ids])
+            )
+        rows = list(db.engine.execute(sql))
+        comment_id = rows[0][0]
+        return comment_id      
 
     def get_user_id_to_follow(self):
         sql = '''
@@ -408,7 +437,51 @@ class ApiNavigator(object):
                     'endpoint_example': '/api/posts/likes/{id}'.format(id=self.like.id),
                     'method': 'DELETE',
                     'request_description': 'Ask to remove a like.',
-                    'response_description': 'A message indicating whether or not the Like was successfully removed/',
+                    'response_description': 'A message indicating whether or not the Like was successfully removed.',
+                    'response_type': 'Message'
+                }
+            ],
+            'Post Likes on Comments': [
+                {
+                    'id': 'likes-comments',
+                    'name': 'Get Likes on Comments',
+                    'endpoint': '/api/likescomments/',
+                    'endpoint_example': '/api/likescomments/',
+                    'method': 'GET',
+                    'request_description': 'Retrieves all of the LikeComments you have created',
+                    'response_description': 'A list of your likes on comments',
+                    'response_type': 'List<LikeComment>',
+                    'parameters': []
+                },
+                {
+                    'id': 'likes-comments-post',
+                    'name': 'Add a Like on Comment',
+                    'endpoint': '/api/likescomments',
+                    'endpoint_example': '/api/likescomments'.format(comment_id=self.unliked_post_id),
+                    'method': 'POST',
+                    'request_description': 'Ensure that the comment id of the Comment that you want to like is included in the endpoint url (see example below).',
+                    'response_description': 'The LikeComment object.',
+                    'response_type': 'List',
+                    'parameters': [
+                        {
+                            'name': 'comment_id',
+                            'data_type': 'int',
+                            'optional_or_required': 'required',
+                            'description': 'The id of the Comment that you would like to like.'
+                        }
+                    ],
+                    'sample_body': json.dumps({
+                        'comment_id': self.unliked_comment_id
+                    }, indent=4)
+                },
+                {
+                    'id': 'likes-comments-delete',
+                    'name': 'Remove a Like on Comment',
+                    'endpoint': '/api/posts/likescomments/<id>',
+                    'endpoint_example': '/api/likescomments/{id}'.format(id=self.likeComment.id),
+                    'method': 'DELETE',
+                    'request_description': 'Ask to remove a like on a comment.',
+                    'response_description': 'A message indicating whether or not the LikeComment was successfully removed.',
                     'response_type': 'Message'
                 }
             ]

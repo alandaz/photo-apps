@@ -25,7 +25,7 @@ class PostListEndpoint(Resource):
         if limit > 50:
             return Response(json.dumps({'message': 'the limit parameter is invalid'}), mimetype="application/json", status=400)
 
-        posts = Post.query.filter(Post.user_id.in_(user_ids)).limit(limit)
+        posts = Post.query.filter(Post.user_id.in_(user_ids)).order_by(Post.pub_date.desc()).limit(limit)
         posts_json = [post.to_dict() for post in posts]
 
         

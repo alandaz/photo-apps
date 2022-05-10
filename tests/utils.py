@@ -2,7 +2,7 @@ import os
 from sqlalchemy import create_engine, inspect
 
 from dotenv import load_dotenv
-load_dotenv(None, None, False, True, True)
+load_dotenv()
 
 def modify_system_path():
     import os, sys, inspect
@@ -13,7 +13,7 @@ def modify_system_path():
 modify_system_path()
 
 #root_url = 'http://127.0.0.1:5000'
-root_url = 'https://photo-app-alanda.herokuapp.com/'
+root_url = 'https://photo-app-ericma2302.herokuapp.com/'
 
 connection_string = os.environ.get('DB_URL')
 db = create_engine(connection_string, pool_size=10, max_overflow=0)
@@ -114,6 +114,33 @@ def get_unliked_post_id_by_user(user_id):
         post_id = rows[0][0]
         return post_id
 
+def get_unliked_comment_id_by_user(user_id):
+    ids = get_authorized_user_ids(user_id)
+    with db.connect() as conn:
+        sql = '''
+            SELECT p.id 
+            FROM comments p
+            WHERE p.id NOT IN (
+                    -- posts that are already bookmarked:
+                    SELECT comment_id from likes_comments where user_id={user_id}
+                )
+                AND p.id IN (
+                    -- posts the current user can access:
+                    SELECT id from comments
+                    WHERE post_id IN (
+                            SELECT id from posts where user_id IN ({authorized_user_ids})
+                        )
+                )
+            LIMIT 1
+        '''.format(
+                user_id=user_id,
+                authorized_user_ids=', '.join([str(id) for id in ids])
+            )
+        rows = list(conn.execute(sql))
+        conn.close()
+        comment_id = rows[0][0]
+        return comment_id        
+
 
 def restore_post_by_id(post):
     with db.connect() as conn:
@@ -169,6 +196,20 @@ def restore_liked_post(liked_post):
         )
         conn.execute(sql)
         conn.close()
+
+def restore_likes_comments(likes_comments):
+    with db.connect() as conn:
+        sql = '''
+            INSERT INTO likes_comments(id, comment_id, user_id, timestamp) 
+            VALUES({id}, {comment_id}, {user_id} , now())
+        '''.format(
+            id=likes_comments.get('id'),
+            comment_id=likes_comments.get('comment_id'),
+            user_id=likes_comments.get('user_id'),
+        )
+        conn.execute(sql)
+        conn.close()
+
 
 def restore_post(post_original_data):
     with db.connect() as conn:
@@ -259,6 +300,33 @@ def get_post_that_user_cannot_access(user_id):
         object = _zip(columns, rows)
         return object
 
+def get_comment_id_that_user_cannot_access(user_id):
+    ids = get_authorized_user_ids(user_id)
+    with db.connect() as conn:
+        sql = '''
+            SELECT p.id 
+            FROM comments p
+            WHERE p.id NOT IN (
+                    -- posts that are already bookmarked:
+                    SELECT comment_id from likes_comments where user_id={user_id}
+                )
+                AND p.id NOT IN (
+                    -- posts the current user can access:
+                    SELECT id from comments
+                    WHERE post_id IN (
+                            SELECT id from posts where user_id IN ({authorized_user_ids})
+                        )
+                )
+            LIMIT 1
+        '''.format(
+                user_id=user_id,
+                authorized_user_ids=', '.join([str(id) for id in ids])
+            )
+        rows = list(conn.execute(sql))
+        conn.close()
+        comment_id = rows[0][0]
+        return comment_id 
+
 
 def get_x_that_user_cannot_delete(table_name, user_id):
     with db.connect() as conn:
@@ -271,6 +339,8 @@ def get_x_that_user_cannot_delete(table_name, user_id):
         object = _zip(columns, rows)
         return object
 
+def get_likes_comments_that_user_cannot_delete(user_id):
+    return get_x_that_user_cannot_delete('likes_comments', user_id)
 
 def get_post_that_user_cannot_edit_delete(user_id):
     return get_x_that_user_cannot_delete('posts', user_id)
@@ -325,6 +395,8 @@ def delete_x_by_id(table_name, id):
         conn.execute(sql)
         conn.close()
 
+def delete_likes_comments_by_id(id):
+    delete_x_by_id('likes_comments', id)
 
 def delete_post_by_id(id):
     delete_x_by_id('posts', id)
@@ -366,6 +438,9 @@ def get_x_by_user(table_name, user_id):
         object = _zip(columns, rows)
         return object
 
+def get_likes_comments_by_user(user_id):
+     return get_x_by_user('likes_comments', user_id)       
+
 
 def get_post_by_user(user_id):
     return get_x_by_user('posts', user_id)
@@ -399,6 +474,9 @@ def get_x_by_id(table_name, id):
         rows = conn.execute(sql)
         return _zip(columns, rows)
 
+
+def get_likes_comments_by_id(id):
+    return get_x_by_id('likes_comments', id)
 
 def get_post_by_id(id):
     return get_x_by_id('posts', id)

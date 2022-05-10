@@ -7,7 +7,7 @@ from faker import Faker
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
-load_dotenv(None, None, False, True, True)
+load_dotenv()
 
 fake = Faker()
 
