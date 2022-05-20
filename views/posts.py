@@ -26,15 +26,11 @@ class PostListEndpoint(Resource):
             return Response(json.dumps({'message': 'the limit parameter is invalid'}), mimetype="application/json", status=400)
 
         posts = Post.query.filter(Post.user_id.in_(user_ids)).order_by(Post.pub_date.desc()).limit(limit)
-        #posts_json = [post.to_dict() for post in posts]
-        data = [
-            post.to_dict(user=self.current_user) for post in posts
-        ]
-        return Response(json.dumps(data), mimetype="application/json", status = 200)
+        posts_json = [post.to_dict() for post in posts]
 
         
        # return Response(json.dumps([]), mimetype="application/json", status=200)
-       # return Response(json.dumps(posts_json), mimetype="application/json", status=200)
+        return Response(json.dumps(posts_json), mimetype="application/json", status=200)
 
     def post(self):
         # create a new post based on the data posted in the body 
@@ -113,9 +109,7 @@ class PostDetailEndpoint(Resource):
         if post.user_id not in user_ids:
             return Response(json.dumps({'message': 'invalid id'}), mimetype="application/json", status=404)
 
-        return Response(json.dumps(post.to_dict(user=self.current_user)), mimetype="application.json", status = 200)
-
-       # return Response(json.dumps(post.to_dict()), mimetype="application/json", status=200)
+        return Response(json.dumps(post.to_dict()), mimetype="application/json", status=200)
 
 def initialize_routes(api):
     api.add_resource(

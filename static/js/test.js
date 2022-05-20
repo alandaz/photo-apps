@@ -83,18 +83,6 @@ const getBookmarks = () => {
             displayPosts();
     });
 }
-
-
-const story2Html = story => {
-    return `
-    <div class = "story-prof">
-        <img src="${story.user.thumb_url} " alt="profile pic for ${ story.user.username }">
-        <div> ${story.user.username} </div>
-    </div>
-    `;
-};
-
-
 const post2Html = (post) => {
     const likes = post.likes.length
     const comments = post.comments.length
@@ -130,7 +118,7 @@ const post2Html = (post) => {
     if(comments > 0) {
         if(comments != 1) {
             displayComment = ` <div style="padding-top: 10px;">
-            <button class = "view-all-comments" > View all ${comments} comments</button>
+            <button class = "view-all-comments" onclick = "openModal(event);" > View all ${comments} comments</button>
             </div>
             <div class = "post-caption">
                 <div class = "caption-bold"> ${lastComment.user.username}</div>

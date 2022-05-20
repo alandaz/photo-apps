@@ -35,17 +35,10 @@ def home():
         'starter-client.html', 
         user=app.current_user
     )
-@app.route('/suggestions')
-def suggestions():
-    return render_template(
-        'suggestions.html', 
-        user=app.current_user
-    )
 
 
 @app.route('/api')
 @app.route('/api/')
-
 def api_docs():
     navigator = ApiNavigator(app.current_user)
     return render_template(
@@ -55,6 +48,13 @@ def api_docs():
         url_root=request.url_root[0:-1] # trim trailing slash
     )
 
+
+@app.route('/lab6')
+def lab6():
+    return render_template(
+        'starter-client.html', 
+        user=app.current_user
+    )
 
 
 # enables flask app to run using "python3 app.py"

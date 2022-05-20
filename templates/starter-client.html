@@ -4,41 +4,73 @@
     <title>Photo App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/starter-client.css">
+    <link rel="stylesheet" href="/static/css/lab6.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
 
     <!-- client-side scripts -->
-    <script lang="text/javascript" src="/static/js/hw04.js" defer></script>
+    <script lang="text/javascript" src="/static/js/hw04.js"></script>
 </head>
 <body>
     <!-- Nav Bar still rendered via server-side template -->
     {% include 'includes/navbar.html'  %}
 
-    <aside>
-        <header>
-            <!-- user profile rendered client-side -->
-        </header>
-        <section id="suggestions">
-            <p class="suggestion-text"> </p>
-            <div>
-                <!-- Suggestions rendered client-side -->
-                
+    <div class = "body">
+        <div class = "feed">
+            <div class = "stories">
+            
             </div>
-        </section>
+
+            <div class = "posts">
+
+            </div>
+
+        </div>
+
+        <div class = "suggestions">
+            <div class = "profile">
+
+            </div>
+            <div class = "others">
+                <div style="font-weight: bold;">
+                    Suggestions for you
+                </div>
+                <section class="js-others">
+
+                </section>
+            </div>
+        </div>
+        <div id = "modalcontainer"></div>
+
+    </div>
+
+   <!--  <aside>
+        <header>
+            user profile rendered client-side 
+        </header>
+        <div class="suggestions">
+            <p class="suggestion-text">Suggestions for you</p>
+            <div>
+                 Suggestions rendered client-side 
+                <p>TBD</p>
+            </div>
+        </div>
     </aside>
 
     <main class="content">
         
         <header class="stories">
-            <!-- Stories rendered client-side (done for you)-->
+           Stories rendered client-side (done for you)
         </header>
 
-        <!-- Posts -->
+         Posts 
         <div id="posts">
-            <!-- Posts rendered client-side -->
+             Posts rendered client-side 
             <p>TBD</p>
         </div>
 
     </main>
-
+ -->
 </body>
 </html>
