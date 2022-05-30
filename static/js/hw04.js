@@ -1,89 +1,52 @@
 var user = null;
-var bookmarks = [];
-var postCounter = 0;
 
-const modalComments = comments => {
-    let html = ``
-    for (let comment of comments) {
-        html += `
-        <div class = "modalcomments">
+const post2Modal = post => {
+    return `<div class="modal-bg" aria-hidden="false" role="dialog">
+    <section class="modal">
+            <img class="modal-img" src="${post.image_url}" />
+            <div class = "modal-right">
+                <section>
+                    <div class="close-div">
+                        <div style="margin-left: auto">
+                            <button data-post-id="${post.id}" class="close" aria-label="Close the modal window" onclick="closeModal(event);">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class = "modal-profile">
+                        <img class = "modal-prof-img" src= "${post.user.thumb_url}" alt="">
+                        <div style="padding-left: 15px;"> ${post.user.username} </div>
+                    </div>
+                </section>
+                <div class="modal-body">
+                    ${displayModalComments(post)}
+                </div>
+            </div>
+    </section>
+    </div>
+    `
+}
 
-            <img src = "${comment.user.img_url}" >
-            <p class = "modaltext"> <strong> ${comment.user.username} </strong>
-            ${comment.text} </p>
+const comment2Modal = comment => {
+    return `
+    <div style = "" class = "modal-comment">
+        <img class = "modal-prof-img" src= "${comment.user.thumb_url}" alt="">
+        <div style = "flex-grow: 1;  padding-right: 10px; padding-left: 10px">
+            <div class = "caption-bold"> ${comment.user.username} </div>
+            <p style="display: inline;"> ${comment.text} </p>
+            <div style="padding-top: 10px; font-weight: bold;"> ${comment.display_time} </div>
         </div>
-        <p class = "time"> ${comment.display_time} </p>
-        `; 
-    }
-    return html; 
-};
-
-const modalFunction = ev => {
-    const postId = ev.currentTarget.dataset.postId; 
-    fetch(`/api/posts/${postId}`)
-        .then(response => response.json())
-        .then(post => {
-            const html = `
-                <div class = "modalbackground">
-                    <button onclick = 'closeModal(event)">
-                        <i class = "fas fa-times"></i>
-                    </button> 
-                    <div class = "modal"> 
-                        <img src = "${ post.image_url}" />
-                        <div class = "postinfo"> 
-                            <div class = "userinfo"> 
-                                < div class = "profilepic" > 
-                                    <img src = "${post.user.thumb_url}">
-                                </div> 
-                                <h1> ${post.user.username} </h1>
-                            </div>
-                            <div class = "modal-comments">
-                                ${openModal(post.comments)}
-                            </div> 
-                        </div> 
-                    </div> 
-                </div>`
-                ;  
-            document.querySelector('#modalcontainer').innerHTML = html; 
-
-            document.getElementById("closeModal").focus(); 
-            document.addEventListener('keydown', function(event){
-                if (event.key === 'Escape') {
-                    closeModal(postId); 
-                }
-            })
-        });
-}
-const openModal = ev => {
-    console.log('open');
-    modalElement.classList.remove('hidden'); 
-    modalElement.setAttribute('aria-hidden', 'false'); 
-    document.querySelector('close').focus(); 
-};
-
-const closeModal = ev => {
-    console.log('close!'); 
-    modalElement.classList.add('hidden'); 
-    modalElement.setAttribute('aria-hidden', 'false'); 
-    document.querySelector('open').focus(); 
-}; 
-
-const getBookmarks = () => {
-    fetch("api/bookmarks/", {
-        method: "GET",
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-            console.log('hi');
-            if(data) bookmarks = data;
-            //document.querySelector('.js-others').innerHTML = `html`;
-            displayPosts();
-    });
+        <i class = "far fa-heart"> </i>
+    </div>
+    `
 }
 
+
+const  displayModalComments = post => {
+    comments = post.comments
+    const html = comments.map(comment2Modal).join('\n');
+    return html;
+}
 
 const story2Html = story => {
     return `
@@ -94,35 +57,17 @@ const story2Html = story => {
     `;
 };
 
-
 const post2Html = (post) => {
     const likes = post.likes.length
     const comments = post.comments.length
     const lastComment = post.comments[post.comments.length - 1]
     var isLiked = false;
     var isBoomarked = false;
-    var likeId = null
-    var bookmarkId = null;
-    postCounter = postCounter + 1;
-    //console.log(bookmarks)
 
-    for(let i = 0; i < likes; i++) {
-        if(user.id == post.likes[i].user_id) {
-            isLiked = true;
-            likeId = post.likes[i].id;
-        }
-        
-    }
 
-    for(let i = 0; i < bookmarks.length; i++) {
-        if(post.id == bookmarks[i].post.id) {
-            isBoomarked = true;
-            bookmarkId = bookmarks[i].id;
-        }
-    }
-
-    //console.log(bookmarks)
-    console.log(isBoomarked)
+    if(post.current_user_like_id) isLiked = true;
+    if(post.current_user_bookmark_id) isBoomarked = true;
+    
     var displayComment = ``;
     var displayHeart = ``;
     var displayBookmark = ``;
@@ -130,7 +75,11 @@ const post2Html = (post) => {
     if(comments > 0) {
         if(comments != 1) {
             displayComment = ` <div style="padding-top: 10px;">
-            <button class = "view-all-comments" > View all ${comments} comments</button>
+            <button
+                id = "display-comments-${post.id}"
+                data-post-id="${post.id}"
+                onclick="showModal(event);"
+                class = "view-all-comments"> View all ${comments} comments</button>
             </div>
             <div class = "post-caption">
                 <div class = "caption-bold"> ${lastComment.user.username}</div>
@@ -147,49 +96,56 @@ const post2Html = (post) => {
     }
 
     if(isLiked) {
-        displayHeart = `<i
-        id = "heart" 
-        class = "fas fa-heart"
-        onclick="toggleLike(event);"
-        data-post-id="${post.id}" 
-        data-like-id="${likeId}"
-        aria-label="Like Post"
-        aria-checked="true"
-        style= "padding-right: 5px; color: red;"></i>`;
+        displayHeart = 
+        `<button class="icon-button" id = "heart-${post.id}" onclick="toggleLike(event);">   
+            <i 
+            class = "fas fa-heart"
+            data-post-id="${post.id}" 
+            data-like-id="${post.current_user_like_id}"
+            aria-label="Like Post"
+            aria-checked="true"
+            style= "padding-right: 5px; color: red;"></i>
+        </button>`
+            ;
     }
     else {
-        displayHeart = `<i 
-        id = "heart"
-        class = "far fa-heart"
-        onclick="toggleLike(event);"
-        data-post-id="${post.id}" 
-        aria-label="Like Post"
-        aria-checked="false"
-        style= "padding-right: 5px;"></i>`;
+        displayHeart = 
+        `<button class="icon-button" id = "heart-${post.id}" onclick="toggleLike(event);">   
+            <i 
+            class = "far fa-heart"
+            data-post-id="${post.id}" 
+            aria-label="Like Post"
+            aria-checked="false"
+            style= "padding-right: 5px;"></i>
+        </button>`;
     }
 
     if(isBoomarked) {
-        displayBookmark = `<i
-         class = "fas fa-bookmark"
-         onclick="toggleBookmark(event);"
-         data-post-id="${post.id}"
-         data-bookmark-id="${bookmarkId}"
-         aria-label="Bookmark Post"
-         aria-checked="true"
-         style= "padding-right: 5px;"></i>`
+        displayBookmark = 
+        `<button class="icon-button" id = "bookmark-${post.id}" onclick="toggleBookmark(event);">
+            <i
+            class = "fas fa-bookmark"
+            data-post-id="${post.id}"
+            data-bookmark-id="${post.current_user_bookmark_id}"
+            aria-label="Bookmark Post"
+            aria-checked="true"
+            style= "padding-right: 5px;"></i>
+        </button>`
     }
     else {
-        displayBookmark = `<i
-        class = "far fa-bookmark"
-        onclick="toggleBookmark(event);"
-        data-post-id="${post.id}"
-        aria-label="Bookmark Post"
-        aria-checked="false"
-        style= "padding-right: 5px;"></i>`
+        displayBookmark = 
+        `<button class="icon-button" id = "bookmark-${post.id}" onclick="toggleBookmark(event);">
+            <i
+            class = "far fa-bookmark"
+            data-post-id="${post.id}"
+            aria-label="Bookmark Post"
+            aria-checked="false"
+            style= "padding-right: 5px;"></i>
+        </button>`
     }
 
     return `    
-    <div class = "post">
+    <div id="post_${post.id}" class = "post">
     <div class = "ind-post">
         <div class = "post-header">
             <div> ${post.user.username} </div>
@@ -225,16 +181,22 @@ const post2Html = (post) => {
     <div class = "post-comment">
         <div class="post-comment-right">
             <i class = "far fa-smile"></i>
-            <input class="post-input" id="input-${postCounter}" placeholder="Add a comment..."></input>
+            <input class="post-input" id="input-${post.id}" placeholder="Add a comment..."></input>
         </div>
         <button 
         style="margin-right: 0px"
         onclick = "postComment(event);"
-        id="${postCounter}" 
+        id="${post.id}" 
         data-post-id="${post.id}" href="" class = "link">Post</button>
     </div>
 </div>
 `
+}
+
+const stringToHTML = htmlString => {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(htmlString, 'text/html');
+    return doc.body.firstChild;
 }
 
 const suggestions2Html = user => {
@@ -263,14 +225,48 @@ const suggestions2Html = user => {
     </div>`
 };
 
+const showModal = ev => {
+    const postId = Number(ev.currentTarget.dataset.postId)
+    redrawPost(postId, post => {
+        const html = post2Modal(post);
+        document.querySelector(`.body`).insertAdjacentHTML("afterend", html);
+        document.querySelector('.close').focus();
+    })
+}
+
+document.addEventListener('focus', function(event) {
+    modalElement = document.querySelector(".modal-bg");
+    if (modalElement && modalElement.getAttribute('aria-hidden') === 'false' && !modalElement.contains(event.target)) {
+        event.stopPropagation();
+        document.querySelector('.close').focus();
+    }
+}, true);
+
+document.addEventListener('keydown', function(event){
+    modalElement = document.querySelector(".modal-bg");
+	if(modalElement && event.key === "Escape" && modalElement.getAttribute('aria-hidden') === 'false'){
+        postId = document.querySelector(".close").dataset.postId;
+		closeModal(event, postId);
+	}
+});
+
+
+const closeModal = (ev, postId) => {
+    var updatedPostId = null;
+    if(!postId) updatedPostId = Number(ev.currentTarget.dataset.postId);
+    else updatedPostId = postId
+    document.querySelector('.modal-bg').remove();
+    const focusButton = '#display-comments-' + updatedPostId;
+    document.querySelector(focusButton).focus();
+}
+
+
 const postComment = ev => {
     const elem = ev.currentTarget;
     const buttonId = elem.getAttribute("id");
     var inputId = "input-" + buttonId;  
     var inputElem = document.querySelector("#" + inputId)
-    
     var inputText = document.querySelector("#" + inputId).value
-    //console.log(inputText)
     inputElem.value = "";
 
     const postData = {
@@ -278,27 +274,29 @@ const postComment = ev => {
         "text": inputText
     };
     
-    fetch("api/comments", {
+    fetch("/api/comments", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCookie('csrf_access_token')
             },
             body: JSON.stringify(postData)
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
-            displayPosts();
+            console.log(data)
+            redrawPost(elem.dataset.postId, post => {
+                redrawCard(post);
+                document.querySelector("#" + inputId).focus();
+            });
         });
 }
 
 
 const toggleBookmark = ev => {
-    const elem = ev.currentTarget;
+    const elem = ev.currentTarget.firstElementChild;
     const postId = elem.dataset.postId;
-    //console.log(elem.dataset.userId);
     if(elem.getAttribute("aria-checked") === 'false') {
-        //console.log('nice')
         bookmarksPost(postId, elem)
     }
     else {
@@ -311,25 +309,29 @@ const bookmarksPost = (postId, elem) => {
     const postData = {
         "post_id": postId
     };
-    
-    fetch("http://localhost:5000/api/bookmarks/", {
+
+    fetch("/api/bookmarks/", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': getCookie('csrf_access_token')
             },
             body: JSON.stringify(postData)
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data);
+            console.log(data)
             elem.className = "fas fa-bookmark"
-            elem.setAttribute('data-bookmark-id', data.id)
-            elem.setAttribute('aria-checked', 'true');
+            redrawPost(postId, post => {
+                redrawCard(post);
+                document.querySelector("#bookmark-" + postId).focus();
+            });
         });
 }
 
 const unbookmarkPost = (bookmarkId, elem) => {
-    const deleteURL = `api/bookmarks/${bookmarkId}`
+    const postId = elem.dataset.postId
+    const deleteURL = `/api/bookmarks/${bookmarkId}`
     fetch(deleteURL, {
         method: "DELETE",
         headers: {
@@ -339,21 +341,20 @@ const unbookmarkPost = (bookmarkId, elem) => {
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        elem.removeAttribute('data-like-id');
-        elem.setAttribute('aria-checked', 'false');
         elem.className = "far fa-bookmark"
+        redrawPost(postId, post => {
+            redrawCard(post);
+            document.querySelector("#bookmark-" + postId).focus();
+        });
     });
 }
 
 
 
 const toggleLike = ev => {
-    //console.log('hi');
-    const elem = ev.currentTarget;
+    const elem = ev.currentTarget.firstElementChild;
     const postId = elem.dataset.postId;
-    //console.log(elem.dataset.userId);
     if(elem.getAttribute("aria-checked") === 'false') {
-        //console.log('nice')
         likePost(postId, elem)
     }
     else {
@@ -367,7 +368,7 @@ const likePost = (postId, elem) => {
         "post_id": postId
     };
     
-    fetch("http://localhost:5000/api/posts/likes/", {
+    fetch("/api/posts/likes/", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -378,15 +379,17 @@ const likePost = (postId, elem) => {
         .then(data => {
             console.log(data);
             elem.className="fas fa-heart"
-            elem.setAttribute('data-like-id', data.id)
-            elem.setAttribute('aria-checked', 'true');
             elem.style.color = 'red'
-            displayPosts();
+            redrawPost(postId, post => {
+                redrawCard(post);
+                document.querySelector("#heart-" + postId).focus();
+            });
         });
 }
 
 const deleteLikePost = (likeId, elem) => {
-    const deleteURL = `api/posts/likes/${likeId}`
+    const postId = elem.dataset.postId
+    const deleteURL = `/api/posts/likes/${likeId}`
     fetch(deleteURL, {
         method: "DELETE",
         headers: {
@@ -396,19 +399,44 @@ const deleteLikePost = (likeId, elem) => {
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        elem.removeAttribute('data-like-id');
-        elem.setAttribute('aria-checked', 'false');
         elem.style.color = 'black'
         elem.className = "far fa-heart"
-        displayPosts();
+        redrawPost(postId, post => {
+            redrawCard(post);
+            document.querySelector("#heart-" + postId).focus();
+        });
     });
 }
 
 
+const redrawPost = (postId, callback) => {
+    fetch(`/api/posts/${postId}`, {
+        method: "GET",
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(!callback) {
+            redrawCard(data);
+        }
+        else {
+            callback(data);
+        } 
+    });
+}
+
+const redrawCard = post => {
+    const html = post2Html(post);
+    const newElement = stringToHTML(html);
+    const postElement = document.querySelector(`#post_${post.id}`);
+    postElement.innerHTML = newElement.innerHTML; 
+}
+
 const toggleFollow = ev => {
     const elem = ev.currentTarget;
     const userId = parseInt(elem.dataset.userId)
-    console.log(elem.dataset.userId);
     if(elem.innerHTML === 'follow') {
         followUser(userId, elem)
     }
@@ -423,7 +451,7 @@ const followUser = (userId, elem) => {
         "user_id": userId
     };
     
-    fetch("api/following/", {
+    fetch("/api/following/", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',
@@ -441,7 +469,7 @@ const followUser = (userId, elem) => {
 }
 
 const unfollowUser = (followingId, elem) => {
-    const deleteURL = `api/following/${followingId}`
+    const deleteURL = `/api/following/${followingId}`
     fetch(deleteURL, {
         method: "DELETE",
         headers: {
@@ -460,10 +488,9 @@ const unfollowUser = (followingId, elem) => {
 
 
 const displaySuggestions = () => {
-    fetch('api/suggestions')
+    fetch('/api/suggestions')
         .then(response => response.json())
         .then(users => {
-            //console.log(users)
             const html = users.map(suggestions2Html).join('\n')
             document.querySelector('.js-others').innerHTML = html;
     })
@@ -481,7 +508,7 @@ const displayStories = () => {
 
 const displayPosts = () => {
     //getBookmarks();
-    fetch("http://localhost:5000/api/posts/?limit=10", {
+    fetch("/api/posts/?limit=10", {
         method: "GET",
         headers: {
             'Content-Type': 'application/json',
@@ -492,6 +519,7 @@ const displayPosts = () => {
         var html = ``;
 
         for(let i = 0; i < data.length; i++) {
+            //(data[i]);
             html = html + '\n' + post2Html(data[i])
         }
 
@@ -501,7 +529,7 @@ const displayPosts = () => {
 }
 
 const displayProfile = () => {
-    fetch("http://localhost:5000/api/profile/", {
+    fetch("/api/profile/", {
         method: "GET",
         headers: {
             'Content-Type': 'application/json',
@@ -509,7 +537,6 @@ const displayProfile = () => {
     })
     .then(response => response.json())
     .then(data => {
-        //console.log(data);
         const html = `
         <div class = "profile">
         <img src= "${data.thumb_url}" alt="">
@@ -521,17 +548,29 @@ const displayProfile = () => {
 }
 
 
+const getCookie = key => {
+    let name = key + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+};
 
 async function initPage() {
-    getBookmarks();
+    displayPosts(); 
     displayProfile();
     displaySuggestions();
     displayStories();
    
 };
-
-
-
 
 // invoke init page to display stories:
 initPage();

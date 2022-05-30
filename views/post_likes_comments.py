@@ -5,12 +5,14 @@ import json
 from platformdirs import user_log_dir
 from models import db, Comment, Post, LikeComment
 from views import get_authorized_user_ids
+import flask_jwt_extended
 
 class LikeCommentListEndpoint(Resource):
 
     def __init__(self, current_user):
         self.current_user = current_user
 
+    @flask_jwt_extended.jwt_required()
     def get(self):
         likeComments = (
             LikeComment.query
@@ -21,7 +23,7 @@ class LikeCommentListEndpoint(Resource):
         likeComments_json = [likeComment.to_dict() for likeComment in likeComments]
         return Response(json.dumps(likeComments_json), mimetype="application/json", status=200)
 
-    
+    @flask_jwt_extended.jwt_required()
     def post(self):
         # create a new "Comment" based on the data posted in the body 
         body = request.get_json()
@@ -72,6 +74,7 @@ class LikeCommentDetailEndpoint(Resource):
     def __init__(self, current_user):
         self.current_user = current_user
   
+    @flask_jwt_extended.jwt_required()
     def delete(self, id):
         if not id:
             return Response(json.dumps({'message': 'invalid id'}), mimetype="application/json", status=400)
@@ -97,12 +100,12 @@ def initialize_routes(api):
         LikeCommentListEndpoint, 
         '/api/likescomments', 
         '/api/likescomments/',
-        resource_class_kwargs={'current_user': api.app.current_user}
+        resource_class_kwargs={'current_user': flask_jwt_extended.current_user}
 
     )
     api.add_resource(
         LikeCommentDetailEndpoint, 
         '/api/likescomments/<int:id>', 
         '/api/likescomments/<int:id>/',
-        resource_class_kwargs={'current_user': api.app.current_user}
+        resource_class_kwargs={'current_user': flask_jwt_extended.current_user}
     )
